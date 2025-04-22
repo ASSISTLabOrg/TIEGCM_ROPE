@@ -1,10 +1,17 @@
 #%%=====
 
+#### basic imports
+import os, sys
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import KDTree as kdt
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+
+#### adds parent path to PYTHONPATH for import; dynamic, should work on any system
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from forecast.states import _array_like
 
 
 #%%======
@@ -38,10 +45,11 @@ def get_proper_indices(ind, n_j):
 
     return i, j
 
-def interp_knn_pca(xn, mu, U, q, tree, scaler, k=8):
+def interp_knn_pca(xn, q, tree, scaler, pca, k=8):
 
     dist, indices = tree.query(xn, k=k)
-    X = scaler.transform((U.T @ q).reshape((1,-1)))[:,indices]
+    Xp = np.squeeze(np.matmul(q.reshape((1,-1)), pca.components_[:,indices]))
+    X = scaler.mean_[indices] + scaler.scale_[indices] * Xp
     w = 1 / dist
     return np.sum(w * X) / np.sum(w) # weighted knn sum
 
@@ -75,8 +83,7 @@ for i, _x in enumerate(x):
 Dg = D.ravel()
 
 scaler = StandardScaler()
-scaler.fit(D_2D.T)
-scaled_data = scaler.transform(D_2D.T)
+scaled_data = scaler.fit_transform(D_2D.T)
 pca = PCA(n_components=2)
 pca.fit(scaled_data)
 xform_data = pca.transform(scaled_data)
@@ -84,23 +91,27 @@ U = pca.components_
 
 
 #%%========
-Ntest = 1000
+Ntest = 10000
 vals = np.zeros(Ntest)
 itp = np.zeros(Ntest)
 itp_pca = np.zeros(Ntest)
 rand = np.random.random(size=(Ntest, 3))
 rand[:,2] = 0
 for i in range(Ntest):
-    vals[i] = f(rand[i,0], rand[i,1], rand[i,2])
-    itp[i] = interp_knn(rand[i,:], Dg, tree, k=8)
-    itp_pca[i] = interp_knn_pca(rand[i,:2],
-                                scaler.mean_, U, xform_data[0, :],
-                                tree_2D, scaler, k=4)
+    vals[i] = f(rand[i,0], rand[i,1], 0.0)
+    itp[i] = interp_knn(rand[i,:], Dg, tree, k=4)
+    itp_pca[i] = interp_knn_pca(rand[i,:2], xform_data[0, :],
+                                tree_2D, scaler, pca, k=4)
 
 err = np.abs(vals - itp)
 err_pca = np.abs(vals - itp_pca)
-plt.hist(err, bins=20, alpha=0.5)
-#plt.hist(err_pca, bins=20, alpha=0.5)
+plt.hist(err, bins=20, alpha=0.5, density=True, label="KNN no PCA")
+plt.hist(err_pca, bins=20, alpha=0.5, density=True, label="KNN w/ PCA")
+plt.axvline(x=np.nanmean(err), color='k', lw=3, ls='-', label="KNN no PCA")
+plt.axvline(x=np.nanmean(err_pca), color='k', lw=3, ls='--', label="KNN w/ PCA")
+plt.legend(fontsize=20, loc='upper right')
+plt.xlabel("Error [abs.]", fontsize=20)
+# plt.xlim([0.02, 0.03])
 plt.show()
 
 # %% 

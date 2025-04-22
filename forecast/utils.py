@@ -1,5 +1,16 @@
+"""
+Contains miscellaneous operations and convenience functions.
+
+Contact: Violet Player
+Email: violet.player@noaa.gov
+"""
+
+#===================================== Imports =====================================#
+
 import numpy as np
-from forecast.statevars import _array_like
+from forecast.states import _array_like
+
+#===================================== Methods =====================================#
 
 def interpolate_matrix(x : _array_like,
                        xp : _array_like, 
