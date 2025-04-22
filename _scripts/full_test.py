@@ -1,10 +1,23 @@
 #%%============================== Imports ==============================%%#
+
+#### adds parent path to PYTHONPATH for import
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+#### basic functionality
 import numpy as np
 import matplotlib.pyplot as plt
+import multiprocessing as mproc
 
+#### forecasting library
 import forecast.models as md
 import forecast.statevars as sv
 from forecast.forecast import forecast
+
+#%%============================== Load data ==============================%%#
+
+
+
 
 #%%============================== Basic Test ==============================%%#
 
@@ -21,7 +34,7 @@ u[:,2] = 0.1 * np.cos(np.pi * t)**2 # kp stand-in
 funcs, names = md._construct_linear_basis_SINDYc(q0, u[0,:])
 
 # Xi = [np.random.random((len(q0), len(funcs))) for i in range(2)]
-Xi = [np.zeros((len(q0), len(funcs))) for i in range(2)]
+Xi = [np.zeros((len(q0), len(funcs))) for i in range(2)] 
 for i in range(2):
     for j in range(len(q0)):
         n_ij = np.random.randint(1,3,2)
@@ -53,11 +66,14 @@ plt.show()
 
 #%%============================== Parallel Test ==============================%%#
 
-N = 10
+N = 2
 jobs = []
 for i in range(N):
     task = sv.TaskState(i, job_params, state)
     jobs.append(task)
 
-#res = forecast(jobs, nproc=1)
+if __name__=="main":
+    pool = mproc.Pool(4)
+    res = forecast(jobs, pool=pool, verbose=True)
+
 # %%

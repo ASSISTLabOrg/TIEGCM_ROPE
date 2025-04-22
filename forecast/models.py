@@ -115,40 +115,70 @@ def _get_coeffs_SINDYc(kp : float,
     else:
         return state.Xi[1] # "f10" model
     
+def construct_basis_SINDYc(q : sv._array_like, 
+                           u : sv._array_like,
+                           basis_library=["linear"],
+                           custom_library=None) -> list[sv.FunctionType]:
+    """
+    
+    """
+    
+    funcs, names = [], []
+    if "linear" in basis_library:
+        _f, _n = _construct_linear_basis_SINDYc(q, u)
+        funcs += _f
+        names += _n
+
+    if "quadratic" in basis_library:
+        _f, _n = _construct_quadratic_basis_SINDYc(q, u)
+        funcs += _f
+        names += _n
+
+    if custom_library is not None:
+        funcs += custom_library["functions"]
+        names += custom_library["names"]
+
+    if len(funcs) == 0:
+        raise Exception("No valid library functions detected. Current options are [linear, quadratic]")
+    
+    return funcs, names
+    
 def _construct_linear_basis_SINDYc(q : sv._array_like, 
-                                   u : sv._array_like) -> list[sv.FunctionType]:
+                                  u : sv._array_like) -> list[sv.FunctionType]:
 
-    #### fills the function space with anonymous functions of the form f(x) = x.
-    funcs = []
-    func_names = []
-    for i in range(len(q)):
-        funcs.append(lambda q, u, i=i: q[i])
-        func_names.append(f"q{i}")
+    #### convenience
+    Nq, Nu = len(q), len(u)
+    
+    #### construct all quadratic functions: q_i*q_j, u_i*u_j and q_i*u_j
+    funcs = [lambda q, u, i=i: q[i] for i in range(Nq)] + \
+            [lambda q, u, i=i: u[i] for i in range(Nu)]
+    
+    #### function labels
+    names = [f"q{i}" for i in range(Nq)] + \
+            [f"u{i}" for i in range(Nu)]
+    
+    return funcs, names
 
-    for j in range(len(u)): # different index for clarity; not otherwise meaningful
-        funcs.append(lambda q, u, j=j: u[j])
-        func_names.append(f"u{j}")
+def _construct_quadratic_basis_SINDYc(q : sv._array_like, 
+                                     u : sv._array_like) -> list[sv.FunctionType]:
+    """
+    Documentation...
+    
+    """
+    #### convenience
+    Nq, Nu = len(q), len(u)
+    
+    #### construct all quadratic functions: q_i*q_j, u_i*u_j and q_i*u_j
+    funcs = [lambda q, u, i=i, j=j: q[i]*q[j] for i in range(Nq) for j in range(Nq)] + \
+            [lambda q, u, i=i, j=j: u[i]*u[j] for i in range(Nu) for j in range(Nu)] + \
+            [lambda q, u, i=i, j=j: q[i]*u[j] for i in range(Nq) for j in range(Nu)]
+    
+    #### function labels
+    names = [f"q{i}*q{j}" for i in range(Nq) for j in range(Nq)] + \
+            [f"u{i}*u{j}" for i in range(Nu) for j in range(Nu)] + \
+            [f"q{i}*u{j}" for i in range(Nq) for j in range(Nu)]
 
-    return funcs, func_names
-
-# for later: here's an order 2 polynomial builder with cross-terms
-# def _construct_order_2_basis(q, u):
-#     funcs = []
-#     func_names = []
-#     for i in range(len(q)):
-#         for j in range(len(q)):
-#             funcs.append(lambda q, u, i=i, j=j: q[i] * q[j])
-#             func_names.append(f"q{i}*q{j}")
-
-#     for i in range(len(u)):
-#         for j in range(len(u)):
-#             funcs.append(lambda q, u, i=i, j=j: u[i] * u[j])
-#             func_names.append(f"u{i}*u{j}")
-
-#     for i in range(len(q)):
-#         for j in range(len(u)):
-#             funcs.append(lambda q, u, i=i, j=j: q[i] * u[j])
-#             func_names.append(f"q{i}*u{j}")
+    return funcs, names
 
 #===================================== DMD model functions =====================================#
 
