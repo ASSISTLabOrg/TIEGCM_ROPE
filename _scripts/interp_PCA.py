@@ -23,7 +23,7 @@ def f(x,y,z,length_scales=[0.5, 0.5, 0.5], phases=[0.0, 0.0, 0.0]):
     f1 = np.cos(2 * np.pi * x / L_x + ph_x)
     f2 = np.cos(2 * np.pi * y / L_y + ph_y)
     f3 = np.cos(2 * np.pi * z / L_z + ph_z) + np.cos(np.pi * z / L_z)
-    return f1*f2*f3
+    return 2 + f1*f2*f3
 
 def interp_knn(xn, data, tree, k=8):
 
@@ -103,15 +103,16 @@ for i in range(Ntest):
     itp_pca[i] = interp_knn_pca(rand[i,:2], xform_data[0, :],
                                 tree_2D, scaler, pca, k=4)
 
-err = np.abs(vals - itp)
-err_pca = np.abs(vals - itp_pca)
+err = (itp_pca - vals) / vals
+err_pca = (itp_pca - vals) / vals
 plt.hist(err, bins=20, alpha=0.5, density=True, label="KNN no PCA")
 plt.hist(err_pca, bins=20, alpha=0.5, density=True, label="KNN w/ PCA")
-plt.axvline(x=np.nanmean(err), color='k', lw=3, ls='-', label="KNN no PCA")
-plt.axvline(x=np.nanmean(err_pca), color='k', lw=3, ls='--', label="KNN w/ PCA")
-plt.legend(fontsize=20, loc='upper right')
+#plt.axvline(x=np.nanmean(err), color='k', lw=3, ls='-', label="KNN no PCA")
+#plt.axvline(x=np.nanmean(err_pca), color='k', lw=3, ls='--', label="KNN w/ PCA")
+#plt.legend(fontsize=20, loc='upper right')
 plt.xlabel("Error [abs.]", fontsize=20)
 # plt.xlim([0.02, 0.03])
+# plt.xlim([-0.1, 0.1])
 plt.show()
 
 # %% 
