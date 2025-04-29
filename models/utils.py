@@ -8,12 +8,12 @@ Email: violet.player@noaa.gov
 #===================================== Imports =====================================#
 
 import numpy as np
-from forecast.states import _array_like
+from forecast import states
 
-#===================================== Methods =====================================#
+#===================================== Array Operations =====================================#
 
-def interpolate_matrix(x : _array_like,
-                       xp : _array_like, 
+def interpolate_matrix(x : states._array_like,
+                       xp : states._array_like, 
                        A : np.ndarray, 
                        method="constant", 
                        axis=-1) -> np.ndarray:
@@ -63,3 +63,32 @@ def _interp_1D(x, xp, yp, method="constant"):
         raise Exception("Choose a valid interpolation method: [constant, linear]")
     
     return y_itp
+
+#===================================== Math =====================================#
+
+def RKO4_step(func : states.FunctionType, 
+               y0 : states.Union[float, np.ndarray],
+               t0 : float, 
+               h : float, 
+               *args) -> states.Union[float, np.ndarray]:
+    """
+    Takes a single step in a Runge-Kutta O(4) solver for equations of the form dy/dt = f(t,y).
+    Makes four function calls per time step.
+
+    Presumes you will do a good job keeping function output shapes consistent, do pay attention to that.
+
+    Arguments:
+        func : f(t,y) in the equation.
+        y0 : Solution on previous step (or initial condition)
+        t0 : Time at which y(t) = y0
+        h : Time step (same units as t0)
+        *args : any additional arguments to be passed to func
+    
+    Returns:
+        Solution for y at time t0 + h
+    """
+    k1 = func(t0, y0, *args)
+    k2 = func(t0 + h/2.0, y0 + k1*h/2.0, *args)
+    k3 = func(t0 + h/2.0, y0 + k2*h/2.0, *args)
+    k4 = func(t0 + h, y0 + k3*h, *args)
+    return y0 + (h/6.0) * (k1 + 2.0*k2 + 2.0*k3 + k4)

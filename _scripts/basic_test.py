@@ -10,9 +10,9 @@ import matplotlib.pyplot as plt
 import multiprocessing as mproc
 
 #### forecasting library
-import forecast.models as md
-import forecast.statevars as sv
-from forecast.forecast import forecast
+import models.sindy as md
+import models.states as sv
+from models.forecast import forecast
 
 #%%============================== Basic Test ==============================%%#
 
