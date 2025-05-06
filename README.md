@@ -1,6 +1,6 @@
 # ROPE Framework
 
-**R**educed **O**rder **P**robabilistic **E**stimator Framework.  
+**R**educed **O**rder **P**robabilistic **E**mulator Framework.  
 This repo contains python scripts for predicing the neutral density in the thermosphere using surrogate ML models trained on physics simulations (TIE-GCM, WAM-IPE).
 
 ## Contents
