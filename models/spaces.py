@@ -1,5 +1,5 @@
 """
-Contains the methods for manipulating various vector spaces
+Contains the methods for manipulating various spaces
 
 Public Methods:
 

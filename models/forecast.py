@@ -14,9 +14,15 @@ Email: violet.player@noaa.gov
 import numpy as np
 import multiprocessing as mproc
 
-from models import sindy, states
+import models.models
+import models.states
 
 #===================================== Public methods =====================================#
+
+def forecast():
+
+    return None
+
 
 # def forecast():
 
