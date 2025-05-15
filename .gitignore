@@ -6,3 +6,5 @@ _data
 *.zip
 *.csv
 *.nzp
+*lrd_analysis
+*drivers_analysis

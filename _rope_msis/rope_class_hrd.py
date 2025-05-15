@@ -164,6 +164,7 @@ class rope_propagator:
     def discrete_to_continuous(self, A_d, B_d, delta_t):
         A_c = (1 / delta_t) * logm(A_d)
         B_c = A_c @ (np.linalg.inv(A_d - np.eye(A_d.shape[0])) @ B_d)
+        # B_c =  np.linalg.inv(np.eye(A_d.shape[0]) - A_d) @ (A_c @ B_d)
 
         return A_c, B_c
 
@@ -336,7 +337,7 @@ class rope_data_interpolator( PythonAtmosphere ):
         self.lt_low = 0.
         self.lt_high = 24 # 23
         self.lat_low = -90.   
-        self.lat_high = 90. # 81
+        self.lat_high = 81. # 81
         self.alt_low = 100.0
         self.alt_high = 980.0
         

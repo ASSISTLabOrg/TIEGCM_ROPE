@@ -334,9 +334,9 @@ class rope_data_interpolator( PythonAtmosphere ):
         self.j2000: Frame = FramesFactory.getEME2000()
         self.utc: UTCScale = TimeScalesFactory.getUTC()
         self.lt_low = 0.
-        self.lt_high = 24 # 23
+        self.lt_high = 23 # 23
         self.lat_low = -90.   
-        self.lat_high = 90. # 81
+        self.lat_high = 81. # 81
         self.alt_low = 100.0
         self.alt_high = 980.0
         
