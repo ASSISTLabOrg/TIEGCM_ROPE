@@ -164,7 +164,6 @@ class rope_propagator:
     def discrete_to_continuous(self, A_d, B_d, delta_t):
         A_c = (1 / delta_t) * logm(A_d)
         B_c = A_c @ (np.linalg.inv(A_d - np.eye(A_d.shape[0])) @ B_d)
-        # B_c =  np.linalg.inv(np.eye(A_d.shape[0]) - A_d) @ (A_c @ B_d)
 
         return A_c, B_c
 
@@ -335,9 +334,9 @@ class rope_data_interpolator( PythonAtmosphere ):
         self.j2000: Frame = FramesFactory.getEME2000()
         self.utc: UTCScale = TimeScalesFactory.getUTC()
         self.lt_low = 0.
-        self.lt_high = 24 # 23
-        self.lat_low = -90.   
-        self.lat_high = 81. # 81
+        self.lt_high = 23 # 23
+        self.lat_low = -87.5   
+        self.lat_high = 87.5 # 81
         self.alt_low = 100.0
         self.alt_high = 980.0
         
@@ -492,6 +491,7 @@ class rope_data_interpolator( PythonAtmosphere ):
         lt = 23. * (np.linspace(self.lt_low, self.lt_high, self.data.U0.shape[0]) - self.lt_low) / (self.lt_high - self.lt_low)
         lat = np.linspace( self.lat_low, self.lat_high, self.data.U0.shape[1]) 
         alt = np.arange( alt0, alt0 + step * ( self.data.U0.shape[2] ), step )
+        
         
         my_interpolating_U0 = rgi( (lt, lat, alt), self.data.U0, bounds_error=False, fill_value=None)
         my_interpolating_mu0 = rgi( (lt, lat, alt), self.data.mu0, bounds_error=False, fill_value=None) 

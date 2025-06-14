@@ -8,3 +8,10 @@ _data
 *.nzp
 *lrd_analysis
 *drivers_analysis
+*fermi
+*grace_data
+*swarm_data
+*champ_data
+*old
+*.7z
+*old_bundles
