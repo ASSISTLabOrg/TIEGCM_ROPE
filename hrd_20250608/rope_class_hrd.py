@@ -750,15 +750,17 @@ class rope_data_interpolator( PythonAtmosphere ):
         if (self.data.date_series is None) | ~((np.all(timestamps >= self.data.date_series[0])) & (np.all(timestamps <= self.data.date_series[-1]))):    
             if np.ndim(timestamps) == 0 or (hasattr(timestamps, 'shape') and timestamps.shape == ()):
                 dates = pd.to_datetime(timestamps)
-                adjusted_forward_propagation = (dates.max() - dates.min()).days + 1
+                prop_date = self.data.date_series[0]
+                adjusted_forward_propagation = (dates.max() - prop_date).days + 1
                 print(f'System is propagating from {timestamps} for {adjusted_forward_propagation} days')   
-                self.data.propagate_models(pd.to_datetime(timestamps), forward_propagation = adjusted_forward_propagation)
+                self.data.propagate_models(pd.to_datetime(prop_date), forward_propagation = adjusted_forward_propagation)
 
             else:
                 dates = pd.to_datetime(timestamps)
-                adjusted_forward_propagation = (dates.max() - dates.min()).days + 1
+                prop_date = self.data.date_series[0]
+                adjusted_forward_propagation = (dates.max() - prop_date).days + 1
                 print(f'System is propagating from {timestamps[0]} for {adjusted_forward_propagation} days')   
-                self.data.propagate_models(pd.to_datetime(timestamps[0]), forward_propagation = adjusted_forward_propagation)
+                self.data.propagate_models(pd.to_datetime(prop_date), forward_propagation = adjusted_forward_propagation)
 
         t = self.data.t
         
@@ -785,18 +787,18 @@ class rope_data_interpolator( PythonAtmosphere ):
             sindy_interpolators_lst.append(interp1d(t.flatten(), self.data.z_dict[sindy_model], \
                 kind='linear', axis=1, bounds_error=False, fill_value = None))
 
-        density_models_values_lst = []
-        for interpolator in sindy_interpolators_lst:
-            rho_model = 10. ** ( np.sum(U0_interp * interpolator(T).T, axis = 1).reshape((-1, 1)) + \
-            mu0_interp.T.reshape((-1, 1)) )
-            density_models_values_lst.append(rho_model)
+        # density_models_values_lst = []
+        # for interpolator in sindy_interpolators_lst:
+        #     rho_model = 10. ** ( np.sum(U0_interp * interpolator(T).T, axis = 1).reshape((-1, 1)) + \
+        #     mu0_interp.T.reshape((-1, 1)) )
+        #     density_models_values_lst.append(rho_model)
         
-        # density_models_values_lst = [ 10. ** ( np.sum(U0_interp * interpolator(T).T, axis = 1).reshape((-1, 1)) + \
-        #     mu0_interp.T.reshape((-1, 1)) ) for interpolator in sindy_interpolators_lst]
+        density_models_values_lst = [ 10. ** ( np.sum(U0_interp * interpolator(T).T, axis = 1).reshape((-1, 1)) + \
+            mu0_interp.T.reshape((-1, 1)) ) for interpolator in sindy_interpolators_lst]
         
         interpolated_models = np.stack(density_models_values_lst).squeeze(-1).T
 
-        density_std = np.nanstd(interpolated_models[:, :-1], axis = 1)
+        density_std = np.nanstd(interpolated_models[:, :], axis = 1)
         density = np.nanmean(interpolated_models[:, :-1], axis = 1)
         # density_poly = interpolated_models[:, 0]
         # density_poly_all = interpolated_models[:, 2]

@@ -45,15 +45,15 @@ print ( 'Java version:', vm.java_version )
 print ( 'Orekit version:', orekit.VERSION )
 
 # +
-forward_propagation = 1
-init_date = pd.to_datetime('2023-05-05 18:00:00')
+#User inputs
+forward_propagation = 1 #forward propagation time
+init_date = pd.to_datetime('2003-05-10 00:00:00')
 
 latitude_values = [89.] # degrees
 local_time_values = [8.] # hours
-altitude_values = [570.] # km
+altitude_values = [358.] # km
 lla_array = np.vstack((latitude_values, local_time_values, altitude_values)).T.reshape((-1, 3))
-timestamps = [pd.to_datetime('2023-05-06 00:00:00')]
-
+timestamps = [pd.to_datetime('2003-05-12 00:00:00')]
 
 sindy = rope.rope_propagator()
 sindy.propagate_models(init_date = init_date, forward_propagation = forward_propagation)
@@ -63,7 +63,7 @@ rope_density = rope.rope_data_interpolator( data = sindy )
 
 all_models, dmd_density, ensemble_density, density_std = rope_density.interpolate(timestamps, lla_array)
 
-ensemble_density
+ensemble_density, density_std
 
 # +
 init_date = pd.to_datetime('2003-10-29 00:00:00')
@@ -129,7 +129,7 @@ max_interp_samples = simulation_points
 
 
 base_timestamp = pd.to_datetime("2003-10-29 00:00:00")
-time_deltas = pd.to_timedelta(np.arange(simulation_points), unit="s")
+time_deltas = pd.to_timedelta(np.arange(simulation_points), unit="ms")
 timestamps_full = base_timestamp + time_deltas
 
 execution_times_interp = []
@@ -155,15 +155,6 @@ for n, interp_points in enumerate(list(range(1, max_interp_samples + 1))[::10000
     print(f"Interpolated {interp_points} points in {elapsed_time:.6f} seconds")
     
 execution_times_interp_df = pd.DataFrame(execution_times_interp)
-
-def exponential(x, a, b):
-    return a * np.exp(b * x)
-
-def linear(x, a, b):
-    return a*x + b
-
-def quadratic(x, a, b, c):
-    return a*x**2 + b*x + c
 
 xdata = execution_times_interp_df['interp_points'].values
 x_fit = np.linspace(min(xdata), max(xdata), 500)
